@@ -1,0 +1,324 @@
+package com.example.simpletodolist.ui.components
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.simpletodolist.R
+import com.example.simpletodolist.data.entity.TodoItem
+import com.example.simpletodolist.ui.theme.SimpleTodoListTheme
+import com.example.simpletodolist.ui.viewmodel.TodoListState
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
+
+@Composable
+fun TodoListContent(
+    state: TodoListState,
+
+    // Selection Mode off
+    onToggle: (Int) -> Unit,
+    onAdd: (String) -> Unit,
+    onRemove: (Int) -> Unit,
+    onEdit: (Int, String) -> Unit,
+    onAssign: (Int) -> Unit,
+
+    // Selection Mode on
+    onLongPress: (Int) -> Unit,
+    onSelectAll: () -> Unit,
+    onClearSelection: () -> Unit,
+    onRemoveSelected: () -> Unit,
+    onToggleSelection: (Int) -> Unit,
+    onSaveNewOrder: (List<TodoItem>) -> Unit
+) {
+    var showAddDialog by remember { mutableStateOf(false) }
+    var newTodoText by remember { mutableStateOf("") }
+
+    var showCompletedTodos by remember { mutableStateOf(true) }
+
+    // Selection Mode
+    val isSelectionModeEnabled = state.isSelectionModeEnabled
+    val selectedIds = state.selectedTodoIds
+
+    // Drag-and-drop
+    val hapticFeedback = LocalHapticFeedback.current
+    var localUncompletedTodos by remember(state.uncompletedTodos) {
+        mutableStateOf(state.uncompletedTodos)
+    }
+    var localAssignedTodos by remember {
+        mutableStateOf(localUncompletedTodos.filter { it.isAssigned })
+    }
+    var localUnassignedTodos by remember {
+        mutableStateOf(localUncompletedTodos.filter { !it.isAssigned })
+    }
+    LaunchedEffect(state.uncompletedTodos) {
+        val newAssigned = state.uncompletedTodos.filter { it.isAssigned }
+        val newUnassigned = state.uncompletedTodos.filter { !it.isAssigned }
+        if (localAssignedTodos != newAssigned || localUnassignedTodos != newUnassigned) {
+            localAssignedTodos = newAssigned
+            localUnassignedTodos = newUnassigned
+        }
+    }
+
+    val lazyListState = rememberLazyListState()
+
+    val assignedCount = localAssignedTodos.size
+    val assignedReorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        localAssignedTodos = localAssignedTodos.toMutableList().apply {
+            add(to.index, removeAt(from.index))
+        }
+        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+    }
+
+    val unassignedReorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        val fromLocalIndex = from.index - assignedCount
+        val toLocalIndex = to.index - assignedCount
+
+        if (toLocalIndex >= 0 && toLocalIndex <= localUnassignedTodos.size) {
+            localUnassignedTodos = localUnassignedTodos.toMutableList().apply {
+                add(toLocalIndex, removeAt(fromLocalIndex))
+            }
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+        }
+    }
+
+    LaunchedEffect(localAssignedTodos, localUnassignedTodos) {
+        val newOrder = localAssignedTodos + localUnassignedTodos
+        if (isSelectionModeEnabled && newOrder.isNotEmpty()) {
+            onSaveNewOrder(newOrder)
+        }
+    }
+
+    // SwipeToReveal
+    var currentRevealedItemId by remember { mutableStateOf<Int?>(null) }
+    val onReveal: (Int) -> Unit = { itemId -> currentRevealedItemId = itemId }
+    val onCollapsed: () -> Unit = { currentRevealedItemId = null }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                isSelectionModeEnabled = isSelectionModeEnabled,
+                selectedCount = selectedIds.size,
+                onClearSelection = onClearSelection,
+                onSelectAll = onSelectAll
+            )
+        },
+        floatingActionButton = {
+            ActionButton(
+                onClick = {
+                    if (isSelectionModeEnabled) {
+                        onRemoveSelected()
+                    } else {
+                        showAddDialog = true
+                    } },
+                isSelectionModeEnabled = isSelectionModeEnabled,
+                selectedCount = selectedIds.size
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize(),
+            state = lazyListState,
+            contentPadding = innerPadding,
+        ) {
+            if (localAssignedTodos.isNotEmpty()) {
+                items(localAssignedTodos, key = { it.id }) { todo ->
+                    ReorderableItem(
+                        assignedReorderableState,
+                        key = todo.id,
+                    ) { isDragging ->
+                        TodoItemRevealWrapper(
+                            todo = todo,
+                            onToggle = onToggle,
+                            onRemove = onRemove,
+                            onEdit = onEdit,
+                            onAssign = onAssign,
+
+                            isSelectionModeEnabled = isSelectionModeEnabled,
+                            isSelected = selectedIds.contains(todo.id),
+                            onLongClick = onLongPress,
+                            onSelectionClick = onToggleSelection,
+
+                            reorderableScope = this,
+                            isDragging = isDragging,
+
+                            currentRevealedItemId = currentRevealedItemId,
+                            onReveal = onReveal,
+                            onCollapsed = onCollapsed,
+                            modifier = Modifier.animateItem()
+                        )
+                    }
+                }
+            }
+            if (localUnassignedTodos.isNotEmpty()) {
+                items(localUnassignedTodos, key = { it.id }) { todo ->
+                    ReorderableItem(
+                        unassignedReorderableState,
+                        key = todo.id,
+                    ) { isDragging ->
+                        TodoItemRevealWrapper(
+                            todo = todo,
+                            onToggle = onToggle,
+                            onRemove = onRemove,
+                            onEdit = onEdit,
+                            onAssign = onAssign,
+
+                            isSelectionModeEnabled = isSelectionModeEnabled,
+                            isSelected = selectedIds.contains(todo.id),
+                            onLongClick = onLongPress,
+                            onSelectionClick = onToggleSelection,
+
+                            reorderableScope = this,
+                            isDragging = isDragging,
+
+                            currentRevealedItemId = currentRevealedItemId,
+                            onReveal = onReveal,
+                            onCollapsed = onCollapsed,
+                            modifier = Modifier.animateItem()
+                        )
+                    }
+                }
+            }
+            if (state.completedTodos.isNotEmpty()) {
+                item {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {
+                                    showCompletedTodos = !showCompletedTodos
+                                }
+                            )
+                            .padding(top = 5.dp, bottom = 5.dp, start = 20.dp),
+                    ) {
+                        val iconRes =
+                            if (showCompletedTodos) R.drawable.ic_arrow_up else R.drawable.ic_arrow_down
+                        Icon(
+                            painter = painterResource(iconRes),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant                           )
+                        Text(
+                            modifier = Modifier.padding(start = 5.dp),
+                            text = "Завершено ${state.completedTodos.size}",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                if (showCompletedTodos) {
+                    items(state.completedTodos, key = { "completed-${it.id}" }) { todo ->
+                        TodoItemRevealWrapper(
+                            todo = todo,
+                            onToggle = onToggle,
+                            onRemove = onRemove,
+                            onEdit = onEdit,
+                            onAssign = onAssign,
+
+                            isSelectionModeEnabled = isSelectionModeEnabled,
+                            isSelected = selectedIds.contains(todo.id),
+                            onLongClick = onLongPress,
+                            onSelectionClick = onToggleSelection,
+
+                            reorderableScope = null,
+                            isDragging = false,
+
+                            currentRevealedItemId = currentRevealedItemId,
+                            onReveal = onReveal,
+                            onCollapsed = onCollapsed,
+
+                            modifier = Modifier.animateItem()
+                        )
+                    }
+                }
+            }
+        }
+
+        if (showAddDialog) {
+            TextDialog(
+                currentText = newTodoText,
+                onTextChanged = {
+                    newTodoText = it.trimStart().replace(Regex("[\n\r]{2,}"), "\n")                                },
+                onAdd = {
+                    val cleanedTextForSave = newTodoText.trim()
+
+                    if (cleanedTextForSave.isNotBlank()) {
+                        onAdd(cleanedTextForSave)
+                        newTodoText = ""
+                        showAddDialog = false
+                    }
+                },
+                onDismiss = {
+                    newTodoText = ""
+                    showAddDialog = false
+                }
+            )
+        }
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun TodoListContentPreview() {
+    val allTodos = listOf(
+        TodoItem(1, "Задача 1: Незавершенная", false, true),
+        TodoItem(2, "Задача 2: Завершена", true),
+        TodoItem(3, "Задача 3: Незавершенная", false),
+        TodoItem(4, "Задача 4: Завершена", true),
+        TodoItem(5, "Задача 5: Завершена", true),
+        TodoItem(6, "Задача 6: Незавершенная", false, false),
+    )
+
+    val uncompleted = allTodos.filter { !it.isCompleted }
+    val completed = allTodos.filter { it.isCompleted }
+
+    val dummyState = TodoListState(
+        todos = allTodos,
+        uncompletedTodos = uncompleted,
+        completedTodos = completed,
+        isSelectionModeEnabled = false,
+        selectedTodoIds = emptySet()
+    )
+
+    SimpleTodoListTheme {
+        TodoListContent(
+            state = dummyState,
+            onToggle = { },
+            onAdd = { },
+            onRemove = { },
+            onEdit = { _, _ -> },
+            onLongPress = { _ ->},
+            onToggleSelection = { _ ->},
+            onClearSelection = { },
+            onSelectAll = { },
+            onRemoveSelected = { },
+            onSaveNewOrder = { },
+            onAssign = { }
+        )
+    }
+}
