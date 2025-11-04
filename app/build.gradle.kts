@@ -49,6 +49,7 @@ android {
 
 dependencies {
     implementation("androidx.compose.material:material-icons-extended")
+    implementation("com.github.commandiron:WheelPickerCompose:1.1.11")
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.compose.material3)

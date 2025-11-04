@@ -22,5 +22,8 @@ data class TodoItem(
     val completionDate: Long? = null,
 
     @ColumnInfo(name = "item_order")
-    val orderIndex: Int = 0
+    val orderIndex: Int = 0,
+
+    @ColumnInfo(name = "reminder_time")
+    val reminderTime: Long? = null,
 )

@@ -84,10 +84,10 @@ class TodoViewModel(private val todoDao: TodoDao) : ViewModel() {
         }
     }
 
-    fun onAdd(title: String) {
+    fun onAdd(title: String, remindedTime: Long?) {
         viewModelScope.launch {
             val currentListSize = state.value.uncompletedTodos.size
-            val newItem = TodoItem(title = title, orderIndex = currentListSize)
+            val newItem = TodoItem(title = title, orderIndex = currentListSize, reminderTime = remindedTime)
             todoDao.insert(newItem)
         }
     }
@@ -101,11 +101,11 @@ class TodoViewModel(private val todoDao: TodoDao) : ViewModel() {
         }
     }
 
-    fun onEdit(todoId: Int, newTitle: String) {
+    fun onEdit(todoId: Int, newTitle: String, remindedTime: Long?) {
         viewModelScope.launch {
             val item = todoDao.getItem(todoId)
             if (item != null) {
-                todoDao.update(item.copy(title = newTitle))
+                todoDao.update(item.copy(title = newTitle, reminderTime = remindedTime))
             }
         }
     }

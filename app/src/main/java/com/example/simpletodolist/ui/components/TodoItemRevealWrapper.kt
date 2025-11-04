@@ -1,5 +1,7 @@
 package com.example.simpletodolist.ui.components
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -26,12 +28,13 @@ import com.example.simpletodolist.ui.theme.topBarColor
 import com.example.simpletodolist.ui.theme.pinButtonColor
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TodoItemRevealWrapper(
     todo: TodoItem,
     onToggle: (Int) -> Unit,
     onRemove: (Int) -> Unit,
-    onEdit: (Int, String) -> Unit,
+    onEdit: (Int, String, Long?) -> Unit,
     onAssign: (Int) -> Unit,
 
     isSelectionModeEnabled: Boolean,
@@ -54,6 +57,8 @@ fun TodoItemRevealWrapper(
     var showEditDialog by remember { mutableStateOf(false) }
     var editText by remember { mutableStateOf(currentItem.title) }
 
+    var editingReminderTime by remember { mutableStateOf(currentItem.reminderTime) }
+
     val isRevealed = todo.id == currentRevealedItemId
     val isSwipeEnabled = !isDragging && !isSelectionModeEnabled
 
@@ -63,11 +68,11 @@ fun TodoItemRevealWrapper(
             onTextChanged = {
                 editText = it.trimStart().replace(Regex("[\n\r]{2,}"), "\n")
             },
-            onAdd = {
+            onSave = { millis ->
                 val cleanedTextForSave = editText.trim()
 
                 if (cleanedTextForSave.isNotBlank()) {
-                    onEdit(currentItem.id, editText)
+                    onEdit(currentItem.id, editText, millis)
                     editText = ""
                     showEditDialog = false
                     onCollapsed()
@@ -75,9 +80,11 @@ fun TodoItemRevealWrapper(
             },
             onDismiss = {
                 editText = ""
+                editingReminderTime = currentItem.reminderTime
                 showEditDialog = false
                 onCollapsed()
-            }
+            },
+            initialTimeMillis = editingReminderTime
         )
     }
     Box(
@@ -129,6 +136,7 @@ fun TodoItemRevealWrapper(
                             onClick = {
                                 showEditDialog = true
                                 editText = currentItem.title
+                                editingReminderTime = currentItem.reminderTime
                             },
                             backgroundColor = editButtonColor,
                             icon = Icons.Default.Edit,

@@ -1,5 +1,7 @@
 package com.example.simpletodolist.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -9,6 +11,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.simpletodolist.ui.components.TodoListContent
 import com.example.simpletodolist.ui.viewmodel.TodoViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodoScreen(
@@ -30,6 +33,6 @@ fun TodoScreen(
         onSelectAll = viewModel::onSelectAll,
         onRemoveSelected = viewModel::onRemoveSelected,
         onSaveNewOrder = viewModel::onSaveNewOrder,
-        onAssign = viewModel::onAssigned
+        onAssign = viewModel::onAssigned,
     )
 }

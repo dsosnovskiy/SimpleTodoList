@@ -1,20 +1,21 @@
 package com.example.simpletodolist.ui.components
 
-import android.R
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material3.Checkbox
@@ -30,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextDecoration
@@ -40,8 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.simpletodolist.data.entity.TodoItem
 import com.example.simpletodolist.ui.theme.SimpleTodoListTheme
-import com.example.simpletodolist.ui.theme.pinButtonColor
-import com.example.simpletodolist.utils.toFormattedDateTime
+import com.example.simpletodolist.utils.toFormattedDateTimeFromMillis
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 
 
@@ -64,7 +63,8 @@ fun TodoItemRow(
     var isExpanded by remember { mutableStateOf(false) }
     val maxTextLines = if (isExpanded) Int.MAX_VALUE else 4
 
-    val formattedDate = todo.completionDate.toFormattedDateTime()
+    val formattedCompletionDate = todo.completionDate.toFormattedDateTimeFromMillis()
+    val formatedReminderTime = todo.reminderTime.toFormattedDateTimeFromMillis()
 
     val clickModifier = if (isSelectionModeEnabled) {
         Modifier.clickable(
@@ -168,10 +168,28 @@ fun TodoItemRow(
             )
             if (todo.isCompleted) {
                 Text(
-                    text = "Выполнено: $formattedDate",
+                    text = "Выполнено: $formattedCompletionDate",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+            if (todo.reminderTime != null) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Alarm,
+                        contentDescription = null,
+                        modifier = Modifier.size(15.dp).offset(y = (-1).dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "Напоминание: $formatedReminderTime",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
         if (isSelectionModeEnabled) {
@@ -200,7 +218,7 @@ fun TodoItemRow(
 fun TodoItemRowPreview() {
     SimpleTodoListTheme {
         TodoItemRow(
-            todo = TodoItem(1, "Задача 1", true, true) ,
+            todo = TodoItem(1, "Задача 1", false, true) ,
             onCheckedChange = { },
             isSelectionModeEnabled = false,
             isSelected = false,

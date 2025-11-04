@@ -1,5 +1,7 @@
 package com.example.simpletodolist.ui.components
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
@@ -8,6 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -33,15 +38,16 @@ import com.example.simpletodolist.ui.viewmodel.TodoListState
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TodoListContent(
     state: TodoListState,
 
     // Selection Mode off
     onToggle: (Int) -> Unit,
-    onAdd: (String) -> Unit,
+    onAdd: (String, Long?) -> Unit,
     onRemove: (Int) -> Unit,
-    onEdit: (Int, String) -> Unit,
+    onEdit: (Int, String, Long?) -> Unit,
     onAssign: (Int) -> Unit,
 
     // Selection Mode on
@@ -50,7 +56,7 @@ fun TodoListContent(
     onClearSelection: () -> Unit,
     onRemoveSelected: () -> Unit,
     onToggleSelection: (Int) -> Unit,
-    onSaveNewOrder: (List<TodoItem>) -> Unit
+    onSaveNewOrder: (List<TodoItem>) -> Unit,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     var newTodoText by remember { mutableStateOf("") }
@@ -264,11 +270,11 @@ fun TodoListContent(
                 currentText = newTodoText,
                 onTextChanged = {
                     newTodoText = it.trimStart().replace(Regex("[\n\r]{2,}"), "\n")                                },
-                onAdd = {
+                onSave = { millis ->
                     val cleanedTextForSave = newTodoText.trim()
 
                     if (cleanedTextForSave.isNotBlank()) {
-                        onAdd(cleanedTextForSave)
+                        onAdd(cleanedTextForSave, millis)
                         newTodoText = ""
                         showAddDialog = false
                     }
@@ -276,12 +282,13 @@ fun TodoListContent(
                 onDismiss = {
                     newTodoText = ""
                     showAddDialog = false
-                }
+                },
             )
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showSystemUi = true)
 @Composable
 fun TodoListContentPreview() {
@@ -309,16 +316,16 @@ fun TodoListContentPreview() {
         TodoListContent(
             state = dummyState,
             onToggle = { },
-            onAdd = { },
+            onAdd = { _, _ -> },
             onRemove = { },
-            onEdit = { _, _ -> },
+            onEdit = { _, _, _-> },
             onLongPress = { _ ->},
             onToggleSelection = { _ ->},
             onClearSelection = { },
             onSelectAll = { },
             onRemoveSelected = { },
             onSaveNewOrder = { },
-            onAssign = { }
+            onAssign = { },
         )
     }
 }
