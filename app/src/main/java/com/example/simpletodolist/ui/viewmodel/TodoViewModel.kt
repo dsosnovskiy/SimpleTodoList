@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.simpletodolist.data.dao.TodoDao // ⬅️ Теперь используем DAO
 import com.example.simpletodolist.data.entity.TodoItem
+import com.example.simpletodolist.data.service.NotificationService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,10 @@ data class TodoListState(
     val selectedTodoIds: Set<Int> = emptySet()
 )
 
-class TodoViewModel(private val todoDao: TodoDao) : ViewModel() {
+class TodoViewModel(
+    private val todoDao: TodoDao,
+    private val notificationService: NotificationService
+) : ViewModel() {
     private val _selectionModeState = MutableStateFlow(
         Pair(false, emptySet<Int>())
     )
@@ -57,12 +61,22 @@ class TodoViewModel(private val todoDao: TodoDao) : ViewModel() {
             val item = todoDao.getItem(todoId)
             if (item != null) {
                 val newStatus = !item.isCompleted
-                val newCompletionDate = if (newStatus) System.currentTimeMillis() else null
+                var newReminderTime: Long? = item.reminderTime
+                var newCompletionDate: Long? = null
+
+                if (newStatus) {
+                    newCompletionDate = System.currentTimeMillis()
+                    if (item.reminderTime != null) {
+                        notificationService.cancelReminder(todoId)
+                    }
+                    newReminderTime = null
+                }
 
                 todoDao.update(
                     item.copy(
                         isCompleted = newStatus,
-                        completionDate = newCompletionDate
+                        completionDate = newCompletionDate,
+                        reminderTime = newReminderTime
                     )
                 )
             }
@@ -84,11 +98,22 @@ class TodoViewModel(private val todoDao: TodoDao) : ViewModel() {
         }
     }
 
-    fun onAdd(title: String, remindedTime: Long?) {
+    fun onAdd(title: String, reminderTime: Long?) {
         viewModelScope.launch {
-            val currentListSize = state.value.uncompletedTodos.size
-            val newItem = TodoItem(title = title, orderIndex = currentListSize, reminderTime = remindedTime)
-            todoDao.insert(newItem)
+            val newTodo = TodoItem(
+                title = title,
+                orderIndex = state.value.uncompletedTodos.size,
+                reminderTime = reminderTime
+            )
+            val newRowId = todoDao.insert(newTodo)
+            val newId = newRowId.toInt()
+            if (reminderTime != null) {
+                notificationService.scheduleReminder(
+                    id = newId,
+                    title = title,
+                    timeMillis = reminderTime
+                )
+            }
         }
     }
 
@@ -101,11 +126,25 @@ class TodoViewModel(private val todoDao: TodoDao) : ViewModel() {
         }
     }
 
-    fun onEdit(todoId: Int, newTitle: String, remindedTime: Long?) {
+    fun onEdit(todoId: Int, newTitle: String, reminderTime: Long?) {
         viewModelScope.launch {
-            val item = todoDao.getItem(todoId)
-            if (item != null) {
-                todoDao.update(item.copy(title = newTitle, reminderTime = remindedTime))
+            val currentTodo = todoDao.getItem(todoId)
+            if (currentTodo != null) {
+                notificationService.cancelReminder(todoId)
+
+                val updatedTodo = currentTodo.copy(
+                    title = newTitle,
+                    reminderTime = reminderTime
+                )
+                todoDao.update(updatedTodo)
+
+                if (reminderTime != null) {
+                    notificationService.scheduleReminder(
+                        id = todoId,
+                        title = newTitle,
+                        timeMillis = reminderTime
+                    )
+                }
             }
         }
     }
@@ -182,13 +221,17 @@ class TodoViewModel(private val todoDao: TodoDao) : ViewModel() {
 }
 
 class TodoViewModelFactory(
-    private val todoDao: TodoDao
+    private val todoDao: TodoDao,
+    private val notificationService: NotificationService
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TodoViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return TodoViewModel(todoDao) as T
+            return TodoViewModel(
+                todoDao = todoDao,
+                notificationService = notificationService
+            ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

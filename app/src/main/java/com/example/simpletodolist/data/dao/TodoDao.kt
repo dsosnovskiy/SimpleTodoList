@@ -25,7 +25,7 @@ interface TodoDao {
     fun getCompletedItems(): Flow<List<TodoItem>>
 
     @Insert
-    suspend fun insert(item: TodoItem)
+    suspend fun insert(item: TodoItem): Long
 
     @Update
     suspend fun update(item: TodoItem)

@@ -1,6 +1,7 @@
 package com.example.simpletodolist.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -103,6 +104,13 @@ fun TodoItemRow(
                 color = backgroundColor,
                 shape = RoundedCornerShape(15.dp),
             )
+            .then(
+                if (todo.reminderTime != null && todo.reminderTime < System.currentTimeMillis()) {
+                    Modifier.border(width = 1.dp, shape = RoundedCornerShape(15.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f))
+                } else {
+                    Modifier
+                }
+            )
             .padding(7.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -173,7 +181,7 @@ fun TodoItemRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            if (todo.reminderTime != null) {
+            if (todo.reminderTime != null && todo.reminderTime > System.currentTimeMillis()) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -190,6 +198,12 @@ fun TodoItemRow(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            } else if (todo.reminderTime != null && todo.reminderTime < System.currentTimeMillis()){
+                Text(
+                    text = "Время выполнить задачу!",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
         if (isSelectionModeEnabled) {
