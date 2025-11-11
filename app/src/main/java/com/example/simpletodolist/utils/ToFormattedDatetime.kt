@@ -5,14 +5,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private const val DATE_TIME_FORMAT = "dd.MM.yyyy 'в' HH:mm"
+private const val DATE_TIME_FORMAT = "MMMM dd, yyyy, 'at' HH:mm"
 
 fun Long?.toFormattedDateTimeFromMillis(): String {
     if (this == null) return ""
 
     val date = Date(this)
 
-    val formatter = SimpleDateFormat(DATE_TIME_FORMAT, Locale("ru", "RU"))
+    val formatter = SimpleDateFormat(DATE_TIME_FORMAT, Locale.ENGLISH)
 
     return formatter.format(date)
 }
@@ -20,7 +20,7 @@ fun Long?.toFormattedDateTimeFromMillis(): String {
 fun String?.toMillisFromFormattedDateTime(): Long? {
     if (this.isNullOrBlank()) return null
 
-    val formatter = SimpleDateFormat(DATE_TIME_FORMAT, Locale("ru", "RU"))
+    val formatter = SimpleDateFormat(DATE_TIME_FORMAT, Locale.ENGLISH)
 
     return try {
         val date: Date? = formatter.parse(this)

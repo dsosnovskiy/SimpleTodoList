@@ -34,7 +34,7 @@ fun TopAppBar(
         CenterAlignedTopAppBar(
             title = {
                 Text(
-                    text = if (selectedCount > 0) "Выбрано: ${selectedCount}" else "Выберите объекты",
+                    text = if (selectedCount > 0) "Selected: ${selectedCount}" else "Select objects",
                     fontSize = 23.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -74,7 +74,7 @@ fun TopAppBar(
         CenterAlignedTopAppBar(
             title = {
                 Text(
-                    text = "Мои задачи",
+                    text = "Task Manager",
                     fontSize = 25.sp,
                     fontWeight = FontWeight.SemiBold,
                 )

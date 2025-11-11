@@ -15,9 +15,8 @@ import com.example.simpletodolist.ui.viewmodel.TodoViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodoScreen(
-    factory: ViewModelProvider.Factory
+    viewModel: TodoViewModel
 ) {
-    val viewModel: TodoViewModel = viewModel(factory = factory)
 
     val state by viewModel.state.collectAsState()
 

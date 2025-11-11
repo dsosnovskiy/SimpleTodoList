@@ -87,7 +87,7 @@ fun SwipeRevealContainer(
             modifier = Modifier
                 .fillMaxSize()
                 .offset { IntOffset(offset.value.roundToInt(), 0) }
-                .clip(RoundedCornerShape(15.dp))
+                .clip(RoundedCornerShape(10.dp))
                 .pointerInput(true) {
                     detectHorizontalDragGestures(
                         onHorizontalDrag = { _, dragAmount ->

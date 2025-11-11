@@ -67,7 +67,7 @@ fun TextDialog(
         if (selectedReminderTime != null) {
             selectedReminderTime!!.toFormattedDateTimeFromMillis()
         } else {
-            "Напоминание"
+            "Reminder"
         }
     }
 
@@ -113,7 +113,7 @@ fun TextDialog(
                             maxLines = 5,
                             placeholder = {
                                 Text(
-                                    text = "Введите текст задачи"
+                                    text = "Enter the title of the task"
                                 )
                             }
                         )
@@ -181,7 +181,7 @@ fun TextDialog(
                         contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
                     ) {
                         Text(
-                            text = "Готово",
+                            text = "Done",
                             color = if (charCount > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                             fontSize = 18.sp,
                             fontWeight = FontWeight.SemiBold

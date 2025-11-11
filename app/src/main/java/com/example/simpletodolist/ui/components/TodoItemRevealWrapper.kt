@@ -21,10 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
-import com.example.simpletodolist.data.entity.TodoItem
+import com.example.simpletodolist.data.model.TodoItem
 import com.example.simpletodolist.ui.theme.deleteButtonColor
 import com.example.simpletodolist.ui.theme.editButtonColor
-import com.example.simpletodolist.ui.theme.topBarColor
 import com.example.simpletodolist.ui.theme.pinButtonColor
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 
@@ -91,7 +90,7 @@ fun TodoItemRevealWrapper(
         modifier = modifier
             .padding(horizontal = 7.dp)
             .padding(vertical = 5.dp)
-            .clip(RoundedCornerShape(15.dp))
+            .clip(RoundedCornerShape(10.dp))
             .shadow(elevation)
     ) {
         if (isSelectionModeEnabled) {
@@ -120,7 +119,7 @@ fun TodoItemRevealWrapper(
                 onExpanded = { onReveal(todo.id) },
                 onCollapsed = onCollapsed,
                 actions = {
-                    val assignedTodoСontentDescription = if (!todo.isAssigned) "Закрепить" else "Открепить"
+                    val assignedTodoСontentDescription = if (!todo.isAssigned) "Pin" else "Unpin"
                     if (!todo.isCompleted) {
                         ActionIcon(
                             onClick = {
@@ -140,7 +139,7 @@ fun TodoItemRevealWrapper(
                             },
                             backgroundColor = editButtonColor,
                             icon = Icons.Default.Edit,
-                            contentDescription = "Изменить",
+                            contentDescription = "Edit",
                             modifier = Modifier.fillMaxHeight()
                         )
                         ActionIcon(
@@ -150,7 +149,7 @@ fun TodoItemRevealWrapper(
                             },
                             backgroundColor = deleteButtonColor,
                             icon = Icons.Default.Delete,
-                            contentDescription = "Удалить",
+                            contentDescription = "Delete",
                             modifier = Modifier.fillMaxHeight()
                         )
                     } else {
@@ -161,7 +160,7 @@ fun TodoItemRevealWrapper(
                             },
                             backgroundColor = deleteButtonColor,
                             icon = Icons.Default.Delete,
-                            contentDescription = "Удалить",
+                            contentDescription = "Edit",
                             modifier = Modifier.fillMaxHeight()
                         )
                     }

@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.example.simpletodolist.data.entity.TodoItem
+import com.example.simpletodolist.data.model.TodoItem
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -13,15 +13,46 @@ interface TodoDao {
         SELECT * FROM todo_items 
         ORDER BY 
             is_completed ASC,
-            item_order ASC,
-            date_of_completion ASC
+            date_of_completion DESC,
+            item_order ASC
     """)
     fun getAllItems(): Flow<List<TodoItem>>
 
-    @Query("SELECT * FROM todo_items WHERE is_completed = 0 ORDER BY is_assigned = 0, item_order ASC")
+    @Query("""
+        SELECT * FROM todo_items 
+        WHERE is_completed = 0 
+        ORDER BY 
+            is_assigned DESC,
+            item_order IS NULL DESC,
+            item_order DESC,
+            last_action_timestamp DESC,
+            id DESC
+    """)
     fun getUncompletedItems(): Flow<List<TodoItem>>
 
-    @Query("SELECT * FROM todo_items WHERE is_completed = 1 ORDER BY date_of_completion ASC")
+    @Query("""
+        SELECT * FROM todo_items 
+        WHERE is_completed = 0 AND is_assigned = 1 
+        ORDER BY 
+            item_order IS NULL DESC, 
+            item_order DESC, 
+            last_action_timestamp DESC, 
+            id DESC
+    """)
+    fun getAssignedItems(): Flow<List<TodoItem>>
+
+    @Query("""
+        SELECT * FROM todo_items 
+        WHERE is_completed = 0 AND is_assigned = 0 
+        ORDER BY 
+            item_order IS NULL DESC, 
+            item_order DESC, 
+            last_action_timestamp DESC, 
+            id DESC
+    """)
+    fun getUnassignedItems(): Flow<List<TodoItem>>
+
+    @Query("SELECT * FROM todo_items WHERE is_completed = 1 ORDER BY date_of_completion DESC")
     fun getCompletedItems(): Flow<List<TodoItem>>
 
     @Insert

@@ -1,4 +1,4 @@
-package com.example.simpletodolist.data.entity
+package com.example.simpletodolist.data.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -22,7 +22,10 @@ data class TodoItem(
     val completionDate: Long? = null,
 
     @ColumnInfo(name = "item_order")
-    val orderIndex: Int = 0,
+    val orderIndex: Long? = 0,
+
+    @ColumnInfo(name = "last_action_timestamp")
+    val lastActionTimestamp: Long? = 0L,
 
     @ColumnInfo(name = "reminder_time")
     val reminderTime: Long? = null,

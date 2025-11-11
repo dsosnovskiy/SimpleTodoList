@@ -1,21 +1,14 @@
-// com.example.simpletodolist.data.service/NotificationService.kt
-package com.example.simpletodolist.data.service
+package com.example.simpletodolist.notifications
 
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import android.util.Log
-import com.example.simpletodolist.utils.EXTRA_TODO_ID
-import com.example.simpletodolist.utils.EXTRA_TODO_TITLE
-import com.example.simpletodolist.utils.ReminderReceiver
 import java.util.concurrent.TimeUnit
 
 class NotificationService(private val context: Context) {
-
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     fun scheduleReminder(id: Int, title: String, timeMillis: Long) {
@@ -24,19 +17,14 @@ class NotificationService(private val context: Context) {
             return
         }
 
+        var useExactAlarm = false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (!alarmManager.canScheduleExactAlarms()) {
-                Log.e("NotificationService", "Нет разрешения SCHEDULE_EXACT_ALARM. Пользователь должен дать его вручную.")
-
-                val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                    data = Uri.fromParts("package", context.packageName, null)
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
-                context.startActivity(intent)
-
-                scheduleInexactReminder(id, title, timeMillis)
-                return
+            useExactAlarm = alarmManager.canScheduleExactAlarms()
+            if (!useExactAlarm) {
+                Log.w("NotificationService", "Нет разрешения SCHEDULE_EXACT_ALARM. Используется неточный будильник.")
             }
+        } else {
+            useExactAlarm = true
         }
 
         val intent = Intent(context, ReminderReceiver::class.java).apply {
@@ -52,12 +40,16 @@ class NotificationService(private val context: Context) {
         )
 
         try {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                timeMillis,
-                pendingIntent
-            )
-            Log.d("NotificationService", "Точное напоминание запланировано на $timeMillis для ID: $id")
+            if (useExactAlarm) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    timeMillis,
+                    pendingIntent
+                )
+                Log.d("NotificationService", "Точное напоминание запланировано на $timeMillis для ID: $id")
+            } else {
+                scheduleInexactReminder(id, title, timeMillis)
+            }
         } catch (e: SecurityException) {
             Log.e("NotificationService", "Ошибка безопасности при планировании точного будильника: ${e.message}")
         }

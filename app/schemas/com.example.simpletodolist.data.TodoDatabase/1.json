@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "38fd1e0d39ac36c9f54ba59069b25b8d",
+    "identityHash": "cc73a96f842d5dd149926ed8f4e5aaa4",
     "entities": [
       {
         "tableName": "todo_items",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `is_completed` INTEGER NOT NULL, `is_assigned` INTEGER NOT NULL, `date_of_completion` INTEGER, `item_order` INTEGER NOT NULL, `reminder_time` INTEGER)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT NOT NULL, `is_completed` INTEGER NOT NULL, `is_assigned` INTEGER NOT NULL, `date_of_completion` INTEGER, `item_order` INTEGER, `last_action_timestamp` INTEGER, `reminder_time` INTEGER)",
         "fields": [
           {
             "fieldPath": "id",
@@ -40,8 +40,12 @@
           {
             "fieldPath": "orderIndex",
             "columnName": "item_order",
-            "affinity": "INTEGER",
-            "notNull": true
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastActionTimestamp",
+            "columnName": "last_action_timestamp",
+            "affinity": "INTEGER"
           },
           {
             "fieldPath": "reminderTime",
@@ -59,7 +63,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '38fd1e0d39ac36c9f54ba59069b25b8d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cc73a96f842d5dd149926ed8f4e5aaa4')"
     ]
   }
 }

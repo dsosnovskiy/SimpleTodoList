@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -32,7 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.simpletodolist.R
-import com.example.simpletodolist.data.entity.TodoItem
+import com.example.simpletodolist.data.model.TodoItem
 import com.example.simpletodolist.ui.theme.SimpleTodoListTheme
 import com.example.simpletodolist.ui.viewmodel.TodoListState
 import sh.calvin.reorderable.ReorderableItem
@@ -60,59 +57,48 @@ fun TodoListContent(
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     var newTodoText by remember { mutableStateOf("") }
-
     var showCompletedTodos by remember { mutableStateOf(true) }
 
     // Selection Mode
     val isSelectionModeEnabled = state.isSelectionModeEnabled
     val selectedIds = state.selectedTodoIds
-
-    // Drag-and-drop
     val hapticFeedback = LocalHapticFeedback.current
-    var localUncompletedTodos by remember(state.uncompletedTodos) {
-        mutableStateOf(state.uncompletedTodos)
+
+    // Reorderable
+    var localAssignedTodos by remember { mutableStateOf(state.assignedTodos) }
+    var localUnassignedTodos by remember { mutableStateOf(state.unassignedTodos) }
+    LaunchedEffect(state.assignedTodos) {
+        if (localAssignedTodos != state.assignedTodos) {
+            localAssignedTodos = state.assignedTodos
+        }
     }
-    var localAssignedTodos by remember {
-        mutableStateOf(localUncompletedTodos.filter { it.isAssigned })
-    }
-    var localUnassignedTodos by remember {
-        mutableStateOf(localUncompletedTodos.filter { !it.isAssigned })
-    }
-    LaunchedEffect(state.uncompletedTodos) {
-        val newAssigned = state.uncompletedTodos.filter { it.isAssigned }
-        val newUnassigned = state.uncompletedTodos.filter { !it.isAssigned }
-        if (localAssignedTodos != newAssigned || localUnassignedTodos != newUnassigned) {
-            localAssignedTodos = newAssigned
-            localUnassignedTodos = newUnassigned
+    LaunchedEffect(state.unassignedTodos) {
+        if (localUnassignedTodos != state.unassignedTodos) {
+            localUnassignedTodos = state.unassignedTodos
         }
     }
 
     val lazyListState = rememberLazyListState()
 
-    val assignedCount = localAssignedTodos.size
     val assignedReorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
         localAssignedTodos = localAssignedTodos.toMutableList().apply {
             add(to.index, removeAt(from.index))
         }
+
         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
     }
 
     val unassignedReorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        val assignedCount = localAssignedTodos.size
         val fromLocalIndex = from.index - assignedCount
         val toLocalIndex = to.index - assignedCount
 
-        if (toLocalIndex >= 0 && toLocalIndex <= localUnassignedTodos.size) {
+        if (fromLocalIndex >= 0 && toLocalIndex >= 0 && toLocalIndex <= localUnassignedTodos.size) {
             localUnassignedTodos = localUnassignedTodos.toMutableList().apply {
                 add(toLocalIndex, removeAt(fromLocalIndex))
             }
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-        }
-    }
 
-    LaunchedEffect(localAssignedTodos, localUnassignedTodos) {
-        val newOrder = localAssignedTodos + localUnassignedTodos
-        if (isSelectionModeEnabled && newOrder.isNotEmpty()) {
-            onSaveNewOrder(newOrder)
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
         }
     }
 
@@ -151,12 +137,20 @@ fun TodoListContent(
             state = lazyListState,
             contentPadding = innerPadding,
         ) {
-            if (localAssignedTodos.isNotEmpty()) {
+            if (state.assignedTodos.isNotEmpty()) {
                 items(localAssignedTodos, key = { it.id }) { todo ->
                     ReorderableItem(
                         assignedReorderableState,
                         key = todo.id,
                     ) { isDragging ->
+                        LaunchedEffect(isDragging) {
+                            if (!isDragging) {
+                                if (localAssignedTodos != state.assignedTodos) {
+                                    val newOrder = localAssignedTodos + localUnassignedTodos
+                                    onSaveNewOrder(newOrder)
+                                }
+                            }
+                        }
                         TodoItemRevealWrapper(
                             todo = todo,
                             onToggle = onToggle,
@@ -180,12 +174,20 @@ fun TodoListContent(
                     }
                 }
             }
-            if (localUnassignedTodos.isNotEmpty()) {
+            if (state.unassignedTodos.isNotEmpty()) {
                 items(localUnassignedTodos, key = { it.id }) { todo ->
                     ReorderableItem(
                         unassignedReorderableState,
                         key = todo.id,
                     ) { isDragging ->
+                        LaunchedEffect(isDragging) {
+                            if (!isDragging) {
+                                if (localUnassignedTodos != state.unassignedTodos) {
+                                    val newOrder = localAssignedTodos + localUnassignedTodos
+                                    onSaveNewOrder(newOrder)
+                                }
+                            }
+                        }
                         TodoItemRevealWrapper(
                             todo = todo,
                             onToggle = onToggle,
@@ -231,7 +233,7 @@ fun TodoListContent(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant                           )
                         Text(
                             modifier = Modifier.padding(start = 5.dp),
-                            text = "Завершено ${state.completedTodos.size}",
+                            text = "Completed ${state.completedTodos.size}",
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

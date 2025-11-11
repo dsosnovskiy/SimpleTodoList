@@ -86,7 +86,7 @@ fun DateTimePickerDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "Напоминание",
+                    text = "Reminder",
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 17.sp
@@ -125,7 +125,7 @@ fun DateTimePickerDialog(
                         )
                     ) {
                         Text(
-                            text = "Отмена",
+                            text = "Cancel",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -148,7 +148,7 @@ fun DateTimePickerDialog(
                         )
                     ) {
                         Text(
-                            text = "ОК",
+                            text = "OK",
                             color = Color.White,
                             fontWeight = FontWeight.SemiBold
                         )

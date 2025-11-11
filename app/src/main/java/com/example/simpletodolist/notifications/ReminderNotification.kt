@@ -1,4 +1,4 @@
-package com.example.simpletodolist.utils
+package com.example.simpletodolist.notifications
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -40,7 +40,7 @@ object ReminderNotification {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_alarm)
-            .setContentTitle("Время выполнить задачу!")
+            .setContentTitle("Time to complete the task!")
             .setContentText(todoTitle)
             .setStyle(NotificationCompat.BigTextStyle().bigText(todoTitle))
             .setPriority(NotificationCompat.PRIORITY_HIGH)

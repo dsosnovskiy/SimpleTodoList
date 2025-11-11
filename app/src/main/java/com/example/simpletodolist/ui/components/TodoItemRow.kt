@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,12 +33,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.simpletodolist.data.entity.TodoItem
+import com.example.simpletodolist.data.model.TodoItem
 import com.example.simpletodolist.ui.theme.SimpleTodoListTheme
 import com.example.simpletodolist.utils.toFormattedDateTimeFromMillis
 import sh.calvin.reorderable.ReorderableCollectionItemScope
@@ -71,7 +71,9 @@ fun TodoItemRow(
         Modifier.clickable(
             interactionSource = interactionSource,
             indication = null,
-            onClick = { onSelectionClick(todo.id) }
+            onClick = {
+                onSelectionClick(todo.id)
+            },
         )
     } else {
         Modifier.combinedClickable(
@@ -80,8 +82,25 @@ fun TodoItemRow(
             onClick = {
                 isExpanded = !isExpanded
             },
-            onLongClick = { onLongClick(todo.id) }
+            onLongClick = {
+                onLongClick(todo.id)
+            }
         )
+    }
+
+    val draggableHandleModifier = if (isSelectionModeEnabled && reorderableScope != null) {
+        with(reorderableScope) {
+            Modifier.draggableHandle(
+                onDragStarted = {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+                },
+                onDragStopped = {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
+                },
+            )
+        }
+    } else {
+        Modifier
     }
 
     val backgroundColor = if (isSelected) {
@@ -100,9 +119,10 @@ fun TodoItemRow(
         modifier = Modifier
             .fillMaxWidth()
             .then(clickModifier)
+            .then(draggableHandleModifier)
             .background(
                 color = backgroundColor,
-                shape = RoundedCornerShape(15.dp),
+                shape = RoundedCornerShape(10.dp),
             )
             .then(
                 if (todo.reminderTime != null && todo.reminderTime < System.currentTimeMillis()) {
@@ -111,7 +131,7 @@ fun TodoItemRow(
                     Modifier
                 }
             )
-            .padding(7.dp),
+            .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -120,36 +140,28 @@ fun TodoItemRow(
         ) {
             if (isSelectionModeEnabled) {
                 if (!todo.isCompleted) {
-                    val handleModifier = if (reorderableScope != null) {
-                        with(reorderableScope) {
-                            Modifier.draggableHandle(
-                                onDragStarted = {
-                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
-                                },
-                                onDragStopped = {
-                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                                },
-                            )
-                        }
-                    } else {
-                        Modifier
-                    }
-                    IconButton(
-                        modifier = handleModifier,
-                        onClick = {},
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = null,
-                            tint = dragIconColor,
-                            modifier = Modifier.size(30.dp),
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = null,
+                        tint = dragIconColor,
+
+                        modifier = Modifier
+                            .padding(start = 10.dp)
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember {MutableInteractionSource()}
+                            ) {
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+                            }.size(25.dp),
+                    )
                 }
             } else {
                 Checkbox(
                     checked = todo.isCompleted,
-                    onCheckedChange = { onCheckedChange() },
+                    onCheckedChange = {
+                        onCheckedChange()
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+                    },
                     colors = CheckboxDefaults.colors(
                         checkmarkColor = MaterialTheme.colorScheme.onPrimary,
                         checkedColor = MaterialTheme.colorScheme.primary,
@@ -171,12 +183,13 @@ fun TodoItemRow(
                 style = MaterialTheme.typography.bodyLarge.copy(
                     textDecoration = if (todo.isCompleted) TextDecoration.LineThrough else null
                 ),
+                fontWeight = FontWeight.SemiBold,
                 maxLines = maxTextLines,
                 overflow = TextOverflow.Ellipsis,
             )
             if (todo.isCompleted) {
                 Text(
-                    text = "Выполнено: $formattedCompletionDate",
+                    text = "Completed: $formattedCompletionDate",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -193,14 +206,14 @@ fun TodoItemRow(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "Напоминание: $formatedReminderTime",
+                        text = "Reminder: $formatedReminderTime",
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             } else if (todo.reminderTime != null && todo.reminderTime < System.currentTimeMillis()){
                 Text(
-                    text = "Время выполнить задачу!",
+                    text = "Time to complete the task!",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -209,7 +222,10 @@ fun TodoItemRow(
         if (isSelectionModeEnabled) {
             Checkbox(
                 checked = isSelected,
-                onCheckedChange = { onSelectionClick(todo.id) },
+                onCheckedChange = {
+                    onSelectionClick(todo.id)
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+                },
                 colors = CheckboxDefaults.colors(
                     checkmarkColor = MaterialTheme.colorScheme.onPrimary,
                     checkedColor = MaterialTheme.colorScheme.primary,

@@ -1,5 +1,6 @@
 plugins {
     id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
     id("androidx.room")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -48,6 +49,9 @@ android {
 }
 
 dependencies {
+    implementation("com.google.dagger:hilt-android:2.57.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.57.1")
+
     implementation("androidx.compose.material:material-icons-extended")
     implementation("com.github.commandiron:WheelPickerCompose:1.1.11")
 
