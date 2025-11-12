@@ -1,5 +1,7 @@
 package com.example.simpletodolist.ui.viewmodel
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -65,6 +67,13 @@ class TodoViewModel @Inject constructor(
             initialValue = TodoListState()
         )
 
+    private val _showPermissionDialog = mutableStateOf(false)
+    val showPermissionDialog: MutableState<Boolean> = _showPermissionDialog
+
+    fun dismissPermissionDialog() {
+        _showPermissionDialog.value = false
+    }
+
     // CRUD
 
     fun onToggle(todoId: Int) {
@@ -99,6 +108,19 @@ class TodoViewModel @Inject constructor(
                 reminderTime
             )
         }
+    }
+
+    fun checkPermissionsBeforeSettingReminder(
+        permissionChecker: () -> Boolean,
+        onPermissionsGranted: () -> Boolean
+    ): Boolean {
+        if (!permissionChecker()) {
+            _showPermissionDialog.value = true
+            return false
+        }
+
+        onPermissionsGranted()
+        return true
     }
 
     // Multi-select mode

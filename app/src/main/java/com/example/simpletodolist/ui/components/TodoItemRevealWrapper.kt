@@ -48,6 +48,8 @@ fun TodoItemRevealWrapper(
     reorderableScope: ReorderableCollectionItemScope?,
     isDragging: Boolean,
 
+    onCheckPermissions: (() -> Boolean) -> Boolean,
+
     modifier: Modifier = Modifier,
 ) {
     val currentItem by rememberUpdatedState(todo)
@@ -83,7 +85,8 @@ fun TodoItemRevealWrapper(
                 showEditDialog = false
                 onCollapsed()
             },
-            initialTimeMillis = editingReminderTime
+            initialTimeMillis = editingReminderTime,
+            onReminderClicked = onCheckPermissions
         )
     }
     Box(

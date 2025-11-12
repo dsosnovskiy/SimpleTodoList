@@ -51,7 +51,9 @@ fun TextDialog(
     onTextChanged: (String) -> Unit,
     onSave: (Long?) -> Unit,
     onDismiss: () -> Unit,
-    initialTimeMillis: Long? = null
+    initialTimeMillis: Long? = null,
+
+    onReminderClicked: ((() -> Boolean) -> Boolean)? = null
 ) {
     val charCount = currentText.length
 
@@ -149,7 +151,17 @@ fun TextDialog(
                             .clip(RoundedCornerShape(7.dp))
                             .clickable(
                                 onClick = {
-                                    showDateTimePicker = true
+                                    val openDateTimePicker = {
+                                        showDateTimePicker = true
+                                        true
+                                    }
+
+                                    if (onReminderClicked != null) {
+                                        onReminderClicked(openDateTimePicker)
+
+                                    } else {
+                                        showDateTimePicker = true
+                                    }
                                 },
                                 enabled = currentText.isNotBlank()
                             )

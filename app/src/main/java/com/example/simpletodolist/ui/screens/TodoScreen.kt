@@ -6,8 +6,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.simpletodolist.MainActivity
 import com.example.simpletodolist.ui.components.TodoListContent
 import com.example.simpletodolist.ui.viewmodel.TodoViewModel
 
@@ -19,6 +21,15 @@ fun TodoScreen(
 ) {
 
     val state by viewModel.state.collectAsState()
+
+    val showPermissionDialog by viewModel.showPermissionDialog
+
+    val context = LocalContext.current
+    val activity = context as MainActivity
+
+    val permissionChecker: () -> Boolean = {
+        activity.hasAllReminderPermissions(context)
+    }
 
     TodoListContent(
         state = state,
@@ -33,5 +44,15 @@ fun TodoScreen(
         onRemoveSelected = viewModel::onRemoveSelected,
         onSaveNewOrder = viewModel::onSaveNewOrder,
         onAssign = viewModel::onAssigned,
+
+        onCheckPermissions = { openTimePicker ->
+            viewModel.checkPermissionsBeforeSettingReminder(
+                permissionChecker = permissionChecker,
+                onPermissionsGranted = openTimePicker
+            )
+        },
+        showPermissionDialog = showPermissionDialog,
+        onDismissPermissionDialog = viewModel::dismissPermissionDialog,
+        onRequestMissingPermissions = activity::requestMissingPermissions,
     )
 }

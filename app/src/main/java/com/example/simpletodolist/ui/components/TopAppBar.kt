@@ -74,7 +74,7 @@ fun TopAppBar(
         CenterAlignedTopAppBar(
             title = {
                 Text(
-                    text = "Task Manager",
+                    text = "My Todos",
                     fontSize = 25.sp,
                     fontWeight = FontWeight.SemiBold,
                 )

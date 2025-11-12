@@ -149,7 +149,7 @@ fun DateTimePickerDialog(
                     ) {
                         Text(
                             text = "OK",
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.SemiBold
                         )
                     }

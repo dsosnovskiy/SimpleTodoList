@@ -6,12 +6,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,6 +61,11 @@ fun TodoListContent(
     onRemoveSelected: () -> Unit,
     onToggleSelection: (Int) -> Unit,
     onSaveNewOrder: (List<TodoItem>) -> Unit,
+
+    onCheckPermissions: (() -> Boolean) -> Boolean,
+    showPermissionDialog: Boolean,
+    onDismissPermissionDialog: () -> Unit,
+    onRequestMissingPermissions: () -> Unit,
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     var newTodoText by remember { mutableStateOf("") }
@@ -166,6 +178,8 @@ fun TodoListContent(
                             reorderableScope = this,
                             isDragging = isDragging,
 
+                            onCheckPermissions = onCheckPermissions,
+
                             currentRevealedItemId = currentRevealedItemId,
                             onReveal = onReveal,
                             onCollapsed = onCollapsed,
@@ -202,6 +216,8 @@ fun TodoListContent(
 
                             reorderableScope = this,
                             isDragging = isDragging,
+
+                            onCheckPermissions = onCheckPermissions,
 
                             currentRevealedItemId = currentRevealedItemId,
                             onReveal = onReveal,
@@ -260,6 +276,8 @@ fun TodoListContent(
                             onReveal = onReveal,
                             onCollapsed = onCollapsed,
 
+                            onCheckPermissions = onCheckPermissions,
+
                             modifier = Modifier.animateItem()
                         )
                     }
@@ -285,6 +303,30 @@ fun TodoListContent(
                     newTodoText = ""
                     showAddDialog = false
                 },
+                onReminderClicked = onCheckPermissions
+            )
+        }
+
+        if (showPermissionDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    onDismissPermissionDialog()
+                },
+                title = { Text("Permissions Required", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                text = { Text("To set reminders, please grant access to notifications and exact alarms.", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                confirmButton = {
+                    Button(onClick = {
+                        onRequestMissingPermissions()
+                        onDismissPermissionDialog()
+                    }) {
+                        Text("Grant Permission", color = MaterialTheme.colorScheme.onSurface)
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = onDismissPermissionDialog, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.outlineVariant)) {
+                        Text("Decline", color = MaterialTheme.colorScheme.onSurface)
+                    }
+                }
             )
         }
     }
@@ -328,6 +370,11 @@ fun TodoListContentPreview() {
             onRemoveSelected = { },
             onSaveNewOrder = { },
             onAssign = { },
+
+            onCheckPermissions = { _ -> true },
+            showPermissionDialog = false,
+            onDismissPermissionDialog = {},
+            onRequestMissingPermissions = {}
         )
     }
 }
