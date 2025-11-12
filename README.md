@@ -32,7 +32,6 @@ To clone, build, and run the application, you will need the following environmen
 
 * **Android Studio:** Version **Hedgehog (2023.1)** or newer (recommended).
 * **JDK:** **JDK 11** or higher.
-* **Android Gradle Plugin (AGP):** [УКАЖИТЕ ВЕРСИЮ, например, 8.2.0].
 
 ### 📱 Device Requirements
 
@@ -47,5 +46,3 @@ To clone, build, and run the application, you will need the following environmen
 3.  Click the **Run** button or use the shortcut `Shift + F10`.
 
 ## 📸 Screenshots
-
-*(Insert links to images or a GIF demonstrating the task list, sorting, and reminder functionality.)*
