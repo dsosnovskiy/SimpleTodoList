@@ -46,3 +46,19 @@ To clone, build, and run the application, you will need the following environmen
 3.  Click the **Run** button or use the shortcut `Shift + F10`.
 
 ## 📸 Screenshots
+
+![Welcome Screen](/assets/screenshots/welcomeScreen.png)
+
+![PermissonPrompt Screen](/assets/screenshots/permissionPromptScreen.png)
+
+![Main Screen Todos](/assets/screenshots/mainScreenTodos.png)
+
+![Main Screen Multi-select Mode](/assets/screenshots/mainScreenMultiselectMode.png)
+
+![Main Screen Text Dialog](/assets/screenshots/mainScreenTextDialog.png)
+
+![Main Screen Reminder Without Permissions](/assets/screenshots/mainScreenReminderWithoutPermissions.png)
+
+![Main Screen Reminder Without Permissions](/assets/screenshots/mainScreenReminderWithoutPermissions.png)
+
+![Main Screen Reminder Without Permissions](/assets/screenshots/mainScreenReminder.png)
