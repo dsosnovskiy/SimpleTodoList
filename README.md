@@ -6,12 +6,27 @@ This project demonstrates the use of modern Google libraries and adheres to Clea
 
 ## ✨ Core Features
 
-* **Reactive UI:** Fully developed using **Jetpack Compose** for a smooth, modern, and adaptive user interface.
-* **Flexible Task Management:** Standard CRUD operations (Create, Read, Update, Delete), including toggling completion status and assignment status (`isAssigned`).
-* **Robust Reminders:** Ability to schedule precise time-based notifications using the **Android AlarmManager**.
-* **Permission Handling:** The application correctly handles necessary runtime permissions, including `POST_NOTIFICATIONS` (for Android 13+) and `SCHEDULE_EXACT_ALARM`.
-* **Drag-and-Drop Sorting:** Convenient manual sorting of uncompleted tasks for easy prioritization.
-* **Multi-Select Mode:** Functionality to select multiple tasks simultaneously for bulk deletion.
+---
+
+### 📱 Modern UI & Task Management
+
+* **Reactive UI (Jetpack Compose):** 🚀 Fully developed using **Jetpack Compose** to ensure a **smooth, modern, and adaptive** user interface that instantly reacts to data changes.
+* **Flexible Task Management (CRUD):** ➕ Includes all standard operations (Create, Read, Update, Delete) with the ability to toggle completion status and assignment status (`isAssigned`).
+* **Swipe-To-Reveal Actions:** 🗑️ Convenient implementation of swipe gestures (left/right) for **instant access to actions** (e.g., quick deletion or status change) without requiring an extra tap.
+
+---
+
+### ⏰ Prioritization & System Integration
+
+* **Robust Reminders (AlarmManager):** 🔔 Ability to set **time-precise notifications** using the core system service **Android AlarmManager** for reliable delivery.
+* **Permission Handling:** 🔐 Correctly handles all necessary runtime permissions, including `POST_NOTIFICATIONS` (for Android 13+) and `SCHEDULE_EXACT_ALARM`, ensuring uninterrupted reminder functionality.
+* **Drag-and-Drop Sorting:** ⬆️⬇️ Convenient feature for **manual sorting** of uncompleted tasks via drag-and-drop, allowing for easy and quick prioritization.
+
+---
+
+### 🧹 Batch Operations
+
+* **Multi-Select Mode:** ✅ Efficient function for selecting **multiple tasks simultaneously** to perform batch actions, such as bulk deletion.
 
 ## 🏛️ Architecture and Tech Stack
 
