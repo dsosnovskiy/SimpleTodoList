@@ -62,21 +62,15 @@ To clone, build, and run the application, you will need the following environmen
 
 ## 📸 Screenshots
 
-## 📸 Screenshots
-
 <div align="center">
-
     <img src="/assets/screenshots/welcomeScreen.png" alt="Welcome Screen" width="300"/>&nbsp;&nbsp;&nbsp;&nbsp;
     <img src="/assets/screenshots/permissionPromptScreen.png" alt="PermissonPrompt Screen" width="300"/>
     <br/><br/>
-    
     <img src="/assets/screenshots/mainScreenTodos.png" alt="Main Screen Todos" width="300"/>&nbsp;&nbsp;&nbsp;&nbsp;
     <img src="/assets/screenshots/mainScreenMultiselectMode.png" alt="Main Screen Multi-select Mode" width="300"/>
     <br/><br/>
-    
     <img src="/assets/screenshots/mainScreenTextDialog.png" alt="Main Screen Text Dialog" width="300"/>&nbsp;&nbsp;&nbsp;&nbsp;
     <img src="/assets/screenshots/mainScreenReminderWithoutPermissions.png" alt="Main Screen Reminder Without Permissions" width="300"/>
     <br/><br/>
-    
     <img src="/assets/screenshots/mainScreenReminder.png" alt="Main Screen Reminder" width="300"/>
 </div>
