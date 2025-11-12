@@ -1,4 +1,4 @@
-# ✍️ Simple Todo List App
+# 📝️ Simple Todo List App
 
 **A simple, reactive, and modern task management application for Android.**
 
@@ -47,18 +47,30 @@ To clone, build, and run the application, you will need the following environmen
 
 ## 📸 Screenshots
 
-![Welcome Screen](/assets/screenshots/welcomeScreen.png)
+<div align="center">
+    <img src="/assets/screenshots/welcomeScreen.png" alt="Welcome Screen" width="300"/>
+</div>
 
-![PermissonPrompt Screen](/assets/screenshots/permissionPromptScreen.png)
+<div align="center">
+    <img src="/assets/screenshots/permissionPromptScreen.png" alt="PermissonPrompt Screen" width="300"/>
+</div>
 
-![Main Screen Todos](/assets/screenshots/mainScreenTodos.png)
+<div align="center">
+    <img src="/assets/screenshots/mainScreenTodos.png" alt="Main Screen Todos" width="300"/>
+</div>
 
-![Main Screen Multi-select Mode](/assets/screenshots/mainScreenMultiselectMode.png)
+<div align="center">
+    <img src="/assets/screenshots/mainScreenMultiselectMode.png" alt="Main Screen Multi-select Mode" width="300"/>
+</div>
 
-![Main Screen Text Dialog](/assets/screenshots/mainScreenTextDialog.png)
+<div align="center">
+    <img src="/assets/screenshots/mainScreenTextDialog.png" alt="Main Screen Text Dialog" width="300"/>
+</div>
 
-![Main Screen Reminder Without Permissions](/assets/screenshots/mainScreenReminderWithoutPermissions.png)
+<div align="center">
+    <img src="/assets/screenshots/mainScreenReminderWithoutPermissions.png" alt="Main Screen Reminder Without Permissions" width="300"/>
+</div>
 
-![Main Screen Reminder Without Permissions](/assets/screenshots/mainScreenReminderWithoutPermissions.png)
-
-![Main Screen Reminder Without Permissions](/assets/screenshots/mainScreenReminder.png)
+<div align="center">
+    <img src="/assets/screenshots/mainScreenReminder.png" alt="Main Screen Reminder" width="300"/>
+</div>
